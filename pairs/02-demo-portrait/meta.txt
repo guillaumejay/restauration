@@ -1,3 +1,0 @@
-title: Portrait restoration
-description: Restoration test on a damaged scan — scratches removed, contrast rebalanced, color cast corrected.
-date: 2025-10-02
