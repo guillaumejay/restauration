@@ -1,0 +1,529 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>pairs2web</title>
+<meta name="description" content="A static gallery of before/after image pairs.">
+<meta name="color-scheme" content="light dark">
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter+Tight:wght@400;500;600&display=swap">
+
+<style>
+  :root {
+    --bg: #f3efe9;
+    --bg-elev: #ffffff;
+    --ink: #1a1816;
+    --ink-soft: #5a544c;
+    --ink-faint: #9b9389;
+    --rule: #d9d2c6;
+    --accent: #b34a2a;
+    --accent-soft: #e9d8c8;
+    --shadow: 0 1px 2px rgba(26, 24, 22, 0.04),
+              0 8px 24px rgba(26, 24, 22, 0.06),
+              0 32px 64px rgba(26, 24, 22, 0.08);
+    --radius: 4px;
+    --max: 1180px;
+    --slide-handle-size: 44px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #15130f;
+      --bg-elev: #1d1a16;
+      --ink: #f1ece3;
+      --ink-soft: #b3aa9c;
+      --ink-faint: #6b6358;
+      --rule: #2e2924;
+      --accent: #e07a4f;
+      --accent-soft: #2c211a;
+      --shadow: 0 1px 2px rgba(0, 0, 0, 0.3),
+                0 8px 24px rgba(0, 0, 0, 0.35),
+                0 32px 64px rgba(0, 0, 0, 0.45);
+    }
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: "Inter Tight", system-ui, -apple-system, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    min-height: 100vh;
+    background-image:
+      radial-gradient(circle at 12% 8%, color-mix(in oklab, var(--accent) 8%, transparent) 0, transparent 38%),
+      radial-gradient(circle at 88% 92%, color-mix(in oklab, var(--accent) 5%, transparent) 0, transparent 40%);
+    background-attachment: fixed;
+  }
+
+  /* ─── Layout ────────────────────────────────────────────── */
+  .wrap {
+    max-width: var(--max);
+    margin: 0 auto;
+    padding: clamp(2.5rem, 6vw, 5rem) clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  header.site {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: end;
+    gap: 2rem;
+    padding-bottom: 1.5rem;
+    margin-bottom: clamp(2rem, 5vw, 4rem);
+    border-bottom: 1px solid var(--rule);
+  }
+  .brand {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-style: italic;
+    font-size: clamp(2.5rem, 6vw, 4.25rem);
+    line-height: 0.95;
+    letter-spacing: -0.025em;
+    margin: 0;
+    font-variation-settings: "opsz" 144, "SOFT" 50;
+  }
+  .brand .amp {
+    color: var(--accent);
+    font-style: normal;
+    font-weight: 300;
+    margin: 0 0.05em;
+  }
+  .meta {
+    text-align: right;
+    font-size: 0.78rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--ink-soft);
+  }
+  .meta .count { color: var(--ink); font-weight: 600; }
+  .meta .dot { color: var(--ink-faint); margin: 0 0.5em; }
+
+  /* ─── Intro ─────────────────────────────────────────────── */
+  .intro {
+    max-width: 60ch;
+    margin: 0 0 clamp(2rem, 5vw, 3.5rem);
+    color: var(--ink-soft);
+    font-size: 1.02rem;
+    line-height: 1.65;
+  }
+  .intro :first-child { margin-top: 0; }
+  .intro :last-child  { margin-bottom: 0; }
+  .intro a { color: var(--accent); text-decoration: none; border-bottom: 1px solid var(--accent-soft); }
+  .intro a:hover { border-color: var(--accent); }
+
+  /* ─── Empty state ───────────────────────────────────────── */
+  .empty {
+    text-align: center;
+    padding: 4rem 1rem;
+    border: 1px dashed var(--rule);
+    border-radius: var(--radius);
+    color: var(--ink-soft);
+  }
+  .empty h2 {
+    font-family: "Fraunces", serif;
+    font-weight: 400;
+    font-size: 1.5rem;
+    margin: 0 0 0.5rem;
+    color: var(--ink);
+  }
+  .empty code {
+    background: var(--bg-elev);
+    padding: 0.15em 0.4em;
+    border-radius: 3px;
+    font-size: 0.9em;
+  }
+
+  /* ─── Pair card ─────────────────────────────────────────── */
+  .gallery {
+    display: grid;
+    gap: clamp(3rem, 6vw, 5rem);
+  }
+  article.pair {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+  .pair-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 1.5rem;
+    flex-wrap: wrap;
+  }
+  .pair-title {
+    font-family: "Fraunces", serif;
+    font-weight: 500;
+    font-size: clamp(1.4rem, 2.6vw, 1.85rem);
+    line-height: 1.15;
+    letter-spacing: -0.015em;
+    margin: 0;
+    font-variation-settings: "opsz" 60;
+  }
+  .pair-num {
+    font-family: "Fraunces", serif;
+    font-style: italic;
+    font-variation-settings: "opsz" 9;
+    color: var(--ink-faint);
+    font-size: 0.85rem;
+    letter-spacing: 0.05em;
+  }
+  .pair-desc {
+    color: var(--ink-soft);
+    margin: 0;
+    max-width: 60ch;
+    font-size: 0.98rem;
+  }
+  .pair-date {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--ink-faint);
+    font-weight: 500;
+  }
+
+  /* ─── Compare slider ────────────────────────────────────── */
+  .compare {
+    position: relative;
+    width: 100%;
+    background: var(--bg-elev);
+    border-radius: var(--radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    user-select: none;
+    -webkit-user-select: none;
+    touch-action: pan-y;
+    cursor: ew-resize;
+  }
+  .compare img {
+    display: block;
+    width: 100%;
+    height: auto;
+    pointer-events: none;
+    -webkit-user-drag: none;
+    user-drag: none;
+  }
+  .compare .after-wrap {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    /* clip-path is set inline by JS */
+  }
+  .compare .after-wrap img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .compare .handle {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: rgba(255, 255, 255, 0.95);
+    box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.15), 0 0 18px rgba(0, 0, 0, 0.25);
+    transform: translateX(-50%);
+    pointer-events: none;
+  }
+  .compare .handle::before {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: var(--slide-handle-size);
+    height: var(--slide-handle-size);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.96);
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25), 0 0 0 1px rgba(0, 0, 0, 0.08);
+  }
+  .compare .handle::after {
+    content: "";
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 18px;
+    height: 10px;
+    transform: translate(-50%, -50%);
+    background:
+      linear-gradient(to right, var(--ink) 50%, transparent 50%) 0 0/2px 10px no-repeat,
+      linear-gradient(to right, transparent 50%, var(--ink) 50%) 100% 0/2px 10px no-repeat,
+      linear-gradient(to right, var(--ink) 4px, transparent 4px 6px, var(--ink) 6px 8px, transparent 8px 10px, var(--ink) 10px 12px, transparent 12px 14px, var(--ink) 14px) 50% 50% / 18px 2px no-repeat;
+    /* simplified chevron-like arrows */
+    -webkit-mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 10'><path d='M6 1 L1 5 L6 9 M12 1 L17 5 L12 9' stroke='black' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/contain no-repeat;
+            mask: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 18 10'><path d='M6 1 L1 5 L6 9 M12 1 L17 5 L12 9' stroke='black' stroke-width='1.5' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>") center/contain no-repeat;
+    background: #1a1816;
+  }
+  .compare .label {
+    position: absolute;
+    top: 1rem;
+    padding: 0.35rem 0.7rem;
+    background: rgba(26, 24, 22, 0.78);
+    color: #f1ece3;
+    font-size: 0.7rem;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    font-weight: 500;
+    border-radius: 2px;
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    pointer-events: none;
+  }
+  .compare .label.before { left: 1rem; }
+  .compare .label.after  { right: 1rem; }
+
+  /* Focus ring for keyboard users */
+  .compare:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 4px;
+  }
+
+  /* ─── Footer ─────────────────────────────────────────────── */
+  footer.site {
+    margin-top: clamp(4rem, 8vw, 7rem);
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--rule);
+    color: var(--ink-faint);
+    font-size: 0.78rem;
+    letter-spacing: 0.05em;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  footer.site a { color: var(--ink-soft); text-decoration: none; border-bottom: 1px solid var(--rule); }
+  footer.site a:hover { color: var(--accent); border-color: var(--accent); }
+
+  /* ─── Reveal animation ──────────────────────────────────── */
+  @media (prefers-reduced-motion: no-preference) {
+    article.pair {
+      opacity: 0;
+      transform: translateY(12px);
+      animation: reveal 0.7s cubic-bezier(0.2, 0.7, 0.2, 1) forwards;
+    }
+    article.pair:nth-child(1) { animation-delay: 0.05s; }
+    article.pair:nth-child(2) { animation-delay: 0.15s; }
+    article.pair:nth-child(3) { animation-delay: 0.25s; }
+    article.pair:nth-child(n+4) { animation-delay: 0.3s; }
+    @keyframes reveal {
+      to { opacity: 1; transform: none; }
+    }
+  }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <header class="site">
+      <h1 class="brand">before<span class="amp">&amp;</span>after</h1>
+      <div class="meta" id="meta" aria-live="polite"></div>
+    </header>
+
+    <section id="intro" class="intro" hidden></section>
+
+    <main id="gallery" class="gallery"></main>
+
+    <footer class="site">
+      <span>Built with <a href="https://github.com/guillaumejay/pairs2web">pairs2web</a></span>
+      <span id="built-at"></span>
+    </footer>
+  </div>
+
+<script>
+(() => {
+  "use strict";
+
+  const galleryEl = document.getElementById("gallery");
+  const introEl   = document.getElementById("intro");
+  const metaEl    = document.getElementById("meta");
+  const builtEl   = document.getElementById("built-at");
+
+  const escapeHTML = (s) => String(s ?? "").replace(/[&<>"']/g, (c) => ({
+    "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"
+  })[c]);
+
+  const formatDate = (raw) => {
+    if (!raw) return "";
+    const d = new Date(raw);
+    if (isNaN(d)) return raw;
+    return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  };
+
+  const renderEmpty = () => {
+    galleryEl.innerHTML = `
+      <div class="empty">
+        <h2>No pairs yet</h2>
+        <p>Drop a folder in <code>pairs/</code> with a <code>before.*</code> and an <code>after.*</code> image, then push.</p>
+      </div>`;
+  };
+
+  const renderPair = (pair, index) => {
+    const article = document.createElement("article");
+    article.className = "pair";
+    const num = String(index + 1).padStart(2, "0");
+    article.innerHTML = `
+      <div class="pair-head">
+        <div>
+          <div class="pair-num">№ ${num}${pair.date ? " · " + escapeHTML(formatDate(pair.date)) : ""}</div>
+          <h2 class="pair-title">${escapeHTML(pair.title)}</h2>
+        </div>
+      </div>
+      ${pair.description ? `<p class="pair-desc">${escapeHTML(pair.description)}</p>` : ""}
+      <div class="compare" tabindex="0" role="slider"
+           aria-label="${escapeHTML(pair.title)} — before/after comparison"
+           aria-valuemin="0" aria-valuemax="100" aria-valuenow="50">
+        <img class="before" src="${escapeHTML(pair.before)}" alt="${escapeHTML(pair.before_label)}: ${escapeHTML(pair.title)}" loading="lazy" decoding="async">
+        <div class="after-wrap" style="clip-path: inset(0 0 0 50%);">
+          <img class="after" src="${escapeHTML(pair.after)}" alt="${escapeHTML(pair.after_label)}: ${escapeHTML(pair.title)}" loading="lazy" decoding="async">
+        </div>
+        <span class="label before">${escapeHTML(pair.before_label)}</span>
+        <span class="label after">${escapeHTML(pair.after_label)}</span>
+        <div class="handle" style="left: 50%;"></div>
+      </div>
+    `;
+
+    // Wire up the slider once the article is built
+    const compare   = article.querySelector(".compare");
+    const beforeImg = article.querySelector("img.before");
+    const afterWrap = article.querySelector(".after-wrap");
+    const afterImg  = article.querySelector("img.after");
+    const handle    = article.querySelector(".handle");
+
+    // Make the .after-wrap match the natural display height of the before image
+    // (we use object-fit: cover on .after to keep the same crop).
+    const syncSize = () => {
+      // The before image dictates layout height since it's the only one
+      // taking real space in the flow.
+      const h = beforeImg.clientHeight;
+      if (h > 0) afterWrap.style.height = h + "px";
+    };
+    if (beforeImg.complete) syncSize();
+    beforeImg.addEventListener("load", syncSize);
+    window.addEventListener("resize", syncSize);
+
+    let pos = 50; // percentage
+
+    const setPos = (p) => {
+      pos = Math.max(0, Math.min(100, p));
+      afterWrap.style.clipPath = `inset(0 0 0 ${pos}%)`;
+      handle.style.left = pos + "%";
+      compare.setAttribute("aria-valuenow", String(Math.round(pos)));
+    };
+
+    const posFromEvent = (clientX) => {
+      const rect = compare.getBoundingClientRect();
+      return ((clientX - rect.left) / rect.width) * 100;
+    };
+
+    let dragging = false;
+    const onDown = (e) => {
+      dragging = true;
+      compare.setPointerCapture?.(e.pointerId);
+      setPos(posFromEvent(e.clientX));
+    };
+    const onMove = (e) => {
+      if (!dragging) return;
+      setPos(posFromEvent(e.clientX));
+    };
+    const onUp = (e) => {
+      dragging = false;
+      compare.releasePointerCapture?.(e.pointerId);
+    };
+
+    compare.addEventListener("pointerdown", onDown);
+    compare.addEventListener("pointermove", onMove);
+    compare.addEventListener("pointerup", onUp);
+    compare.addEventListener("pointercancel", onUp);
+    compare.addEventListener("pointerleave", onUp);
+
+    // Keyboard support
+    compare.addEventListener("keydown", (e) => {
+      const step = e.shiftKey ? 10 : 2;
+      if (e.key === "ArrowLeft")  { setPos(pos - step); e.preventDefault(); }
+      else if (e.key === "ArrowRight") { setPos(pos + step); e.preventDefault(); }
+      else if (e.key === "Home")  { setPos(0);   e.preventDefault(); }
+      else if (e.key === "End")   { setPos(100); e.preventDefault(); }
+    });
+
+    // Subtle hover hint: nudge the slider on first hover so users
+    // immediately see it's interactive. Once.
+    let hovered = false;
+    compare.addEventListener("pointerenter", () => {
+      if (hovered) return;
+      hovered = true;
+      const start = pos;
+      const t0 = performance.now();
+      const dur = 600;
+      const animate = (t) => {
+        const k = Math.min(1, (t - t0) / dur);
+        // ease in-out, peak at 60% then back
+        const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+        const peak = start < 50 ? start + 8 : start - 8;
+        setPos(start + (peak - start) * (Math.sin(e * Math.PI)));
+        if (k < 1) requestAnimationFrame(animate);
+        else setPos(start);
+      };
+      requestAnimationFrame(animate);
+    }, { once: true });
+
+    return article;
+  };
+
+  fetch("pairs.json", { cache: "no-cache" })
+    .then((r) => {
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      return r.json();
+    })
+    .then((data) => {
+      const pairs = Array.isArray(data?.pairs) ? data.pairs : [];
+      const count = pairs.length;
+
+      if (typeof data?.intro === "string" && data.intro.trim()) {
+        introEl.innerHTML = data.intro;
+        introEl.hidden = false;
+      }
+
+      metaEl.innerHTML = count > 0
+        ? `<span class="count">${count}</span> pair${count > 1 ? "s" : ""}<span class="dot">·</span>static`
+        : `<span class="dot">·</span>empty`;
+
+      if (data?.generated_at) {
+        const d = new Date(data.generated_at);
+        if (!isNaN(d)) {
+          builtEl.textContent = "Built " + d.toLocaleDateString(undefined, {
+            year: "numeric", month: "short", day: "numeric"
+          });
+        }
+      }
+
+      if (count === 0) {
+        renderEmpty();
+        return;
+      }
+
+      const frag = document.createDocumentFragment();
+      pairs.forEach((p, i) => frag.appendChild(renderPair(p, i)));
+      galleryEl.appendChild(frag);
+    })
+    .catch((err) => {
+      console.error("Failed to load pairs.json", err);
+      galleryEl.innerHTML = `
+        <div class="empty">
+          <h2>Could not load gallery</h2>
+          <p>The build manifest <code>pairs.json</code> is missing or invalid.</p>
+        </div>`;
+    });
+})();
+</script>
+</body>
+</html>

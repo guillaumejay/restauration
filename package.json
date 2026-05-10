@@ -1,0 +1,11 @@
+{
+  "name": "pairs2web",
+  "version": "1.0.0",
+  "description": "Static before/after image gallery — drop pairs in pairs/ and deploy.",
+  "private": true,
+  "scripts": {
+    "build": "bash build.sh",
+    "serve": "python3 -m http.server -d public 8000"
+  },
+  "license": "MIT"
+}

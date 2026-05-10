@@ -1,0 +1,19 @@
+# Build output (regenerated on every build)
+public/pairs/
+public/pairs.json
+
+# OS / editor / tool noise
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+.idea/
+.vscode/
+.claude/
+
+# Node (in case anyone adds tooling later)
+node_modules/
+
+# Vercel / Cloudflare local
+.vercel
+.wrangler/
